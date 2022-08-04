@@ -13,6 +13,10 @@ const userSchema = mongoose.Schema({
     password: {
         type: String,
         required: [true, 'Please add a password']
+    }, 
+    profileImage: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Image'
     }
 },
     {
