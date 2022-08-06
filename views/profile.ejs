@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register influencer</title>
+</head>
+
+<body>
+    <h1>Influencer Profile</h1>
+    <hr>
+    <h2>
+        <%= data.fullName %>
+    </h2>
+    <img src="data:image/<%=data.profilePhoto.contentType%>;base64,
+    <%=data.profilePhoto.data%>">
+</body>
+
+</html>

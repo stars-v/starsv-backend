@@ -1,30 +1,30 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
-const userSchema = mongoose.Schema({
-    fullName: {
-        type: String,
-        required: [true, 'Please add a full name']
-    },
-    email: {
-        type: String,
-        required: [true, 'Please add an email'],
-        unique: true
-    },
-    password: {
-        type: String,
-        required: [true, 'Please add a password']
-    }, 
-    profileImage: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Image'
-    }
-},
-    {
-        timestamps: true,
-    }
-)
+const influencerSchema = mongoose.Schema(
+	{
+		fullName: {
+			type: String,
+			required: [true, 'Please add a full name'],
+		},
+		email: {
+			type: String,
+			required: [true, 'Please add an email'],
+			unique: true,
+		},
+		password: {
+			type: String,
+			required: [true, 'Please add a password'],
+		},
+		profilePhoto: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'Image',
+		},
+	},
+	{
+		timestamps: true,
+	}
+);
 
+const Influencer = mongoose.model('Influencer', influencerSchema);
 
-const User = mongoose.model('User', userSchema)
-
-module.exports = User
+module.exports = Influencer;
