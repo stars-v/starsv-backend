@@ -26,8 +26,8 @@ const registerInfluencer = asyncHandler(async (req, res) => {
 
 	// Get profile image id
 	const obj = {
-		name: req.body.name || '',
-		desc: req.body.desc || '',
+		name: req.file.originalname,
+		desc: '',
 		img: {
 			data: fs.readFileSync(
 				path.join(
@@ -49,6 +49,18 @@ const registerInfluencer = asyncHandler(async (req, res) => {
 		password: hashedPassword,
 		profilePhoto: image.id,
 	});
+
+	// Remove the image from the uploads/images folder
+	fs.unlink(
+		path.join(`${__dirname}/../../uploads/images/${req.file.filename}`),
+		(err) => {
+			if (err) {
+				console.error(err);
+				return;
+			}
+			// image removed
+		}
+	);
 
 	if (influencer) {
 		res.status(201).json({
