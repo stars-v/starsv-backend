@@ -19,6 +19,7 @@ const influencerSchema = mongoose.Schema(
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'Image',
 		},
+		videos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Video' }],
 	},
 	{
 		timestamps: true,

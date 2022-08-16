@@ -132,6 +132,29 @@ const getMe = asyncHandler(async (req, res) => {
 	});
 });
 
+const referenceVideo = asyncHandler(async (req, res) => {
+	// Get the video id
+	const { id } = req.file;
+
+	// Push the video id to the influencer videos[]
+	Influencer.findByIdAndUpdate(
+		req.influencer.id,
+		{
+			$push: { videos: id },
+		},
+		{
+			new: true,
+		},
+		(err, result) => {
+			if (err) throw err;
+		}
+	);
+	res.status(201).json({
+		success: true,
+		msg: 'video has been uploaded successfully',
+	});
+});
+ 
 const generateToken = (id) => {
 	return jwt.sign({ id }, process.env.JWT_SECRET, {
 		expiresIn: '12h',
@@ -142,4 +165,5 @@ module.exports = {
 	registerInfluencer,
 	loginInfluencer,
 	getMe,
+	referenceVideo,
 };

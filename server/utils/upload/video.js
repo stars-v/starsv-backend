@@ -1,19 +1,13 @@
 const mongoose = require('mongoose');
 const crypto = require('crypto');
+const path = require('path');
+const multer = require('multer');
 const { GridFsStorage } = require('multer-gridfs-storage');
 const Grid = require('gridfs-stream');
 
 const mongoURI = process.env.MONGO_URI;
 
 const conn = mongoose.createConnection(mongoURI);
-
-// init gfs
-let gfs;
-
-conn.once('open', () => {
-	gfs = Grid(conn.db, mongoose.mongo);
-	gfs.collection('images');
-});
 
 // Create storage engine
 const storage = new GridFsStorage({
@@ -37,8 +31,8 @@ const storage = new GridFsStorage({
 	},
 });
 
-const upload = multer({ storage });
+const uploadVideo = multer({ storage });
 
 module.exports = {
-	upload,
+	uploadVideo,
 };
