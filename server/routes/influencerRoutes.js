@@ -84,7 +84,7 @@ router.get('/videos/:filename/download', async (req, res) => {
 });
 
 // -> Delete a video
-router.get('/videos/:filename/delete', protect, async (req, res) => {
+router.delete('/videos/:filename/delete', protect, async (req, res) => {
 	// init gfs
 	const gfs = Grid(connection.db, mongoose.mongo);
 	gfs.collection('videos');
@@ -95,13 +95,18 @@ router.get('/videos/:filename/delete', protect, async (req, res) => {
 
 	gfs.files.findOne({ filename: req.params.filename }, async (err, file) => {
 		if (err) return res.status(404).send(err);
-		if (!file || file.length === 0)
-			return res.status(404).send('Video not found');
+		if (!file || file.length === 0) return;
 
-		await Influencer.findByIdAndUpdate(req.influencer.id, {
-			$pull: { videos: { _id: file._id } },
-		});
+		const influencer = await Influencer.findById(req.influencer.id);
+		influencer.videos.pull(file._id);
+		influencer.save();
+
 		gridFsBucket.delete(file._id);
+	});
+
+	res.status(201).json({
+		success: true,
+		message: 'Video deleted successfully',
 	});
 });
 
