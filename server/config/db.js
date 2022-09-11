@@ -3,8 +3,9 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
 	try {
+		const mongoUri = process.env.NODE_ENV === 'production' ? process.env.MONGO_URI : "mongodb://localhost:27017/StarsV"
 		const conn = await mongoose.connect(
-			process.env.MONGO_URI
+			mongoUri
 		);
 		console.log(
 			`Mongodb connected: ${conn.connection.host}`.cyan.underline
