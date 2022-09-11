@@ -4,7 +4,8 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm ci --only=production
+RUN npm install --legacy-peer-deps
+# RUN npm ci --only=production
 
 COPY . .
 
