@@ -1,14 +1,15 @@
 const express = require('express');
-const mongoose = require('mongoose');
-const fs = require('fs');
-const path = require('path');
-const { connection } = require('../config/db');
 const router = express.Router();
 const {
 	registerInfluencer,
 	loginInfluencer,
 	getMe,
-	referenceVideo,
+	resetPassword,
+	getVideos,
+	saveVideo,
+	streamVideo,
+	downloadVideo,
+	deleteVideo
 } = require('../controllers/influencerController');
 const { protect } = require('../middleware/authMiddleware');
 const { uploadImage } = require('../utils/upload/image');
@@ -20,94 +21,21 @@ router.post('/', uploadImage.single('profilePhoto'), registerInfluencer);
 router.post('/login', loginInfluencer);
 router.get('/me', protect, getMe);
 
-//Handling videos uploading
 // -> upload a video
-router.post('/videos', protect, uploadVideo.single('video'), referenceVideo);
+router.post('/videos', protect, uploadVideo.single('video'), saveVideo);
 
 // -> get all videos
-router.get('/videos', protect, async (req, res) => {
-	// init gfs
-	const gfs = Grid(connection.db, mongoose.mongo);
-	gfs.collection('videos');
-	// influencers videos ids
-	const influencer = await Influencer.findById(req.influencer.id);
-	const videosIds = influencer.videos;
-
-	gfs.files.find({ _id: { $in: videosIds } }).toArray((err, files) => {
-		return res.json({ videos: files });
-	});
-});
+router.get('/videos', protect, getVideos);
 
 // -> Stream a video
-router.get('/videos/:filename/stream', async (req, res) => {
-	// init gfs
-	const gfs = Grid(connection.db, mongoose.mongo);
-	gfs.collection('videos');
-
-	const gridFsBucket = new mongoose.mongo.GridFSBucket(connection.db, {
-		bucketName: 'videos',
-	});
-
-	gfs.files.findOne(
-		{
-			filename: req.params.filename,
-		},
-		(err, file) => {
-			if (err) return res.status(404).send(err);
-			if (!file || file.length === 0)
-				return res.status(404).send('Video not found');
-
-			const readStream = gridFsBucket.openDownloadStream(file._id);
-			readStream.pipe(res);
-		}
-	);
-});
+router.get('/videos/:filename/stream', streamVideo);
 
 // -> Download a video
-router.get('/videos/:filename/download', async (req, res) => {
-	// init gfs
-	const gfs = Grid(connection.db, mongoose.mongo);
-	gfs.collection('videos');
-
-	const gridFsBucket = new mongoose.mongo.GridFSBucket(connection.db, {
-		bucketName: 'videos',
-	});
-
-	gfs.files.findOne({ filename: req.params.filename }, (err, file) => {
-		if (err) return res.status(404).send(err);
-		if (!file || file.length === 0)
-			return res.status(404).send('Video not found');
-
-		res.type(file.contentType);
-		gridFsBucket.openDownloadStream(file._id).pipe(res);
-	});
-});
+router.get('/videos/:filename/download', downloadVideo);
 
 // -> Delete a video
-router.delete('/videos/:filename/delete', protect, async (req, res) => {
-	// init gfs
-	const gfs = Grid(connection.db, mongoose.mongo);
-	gfs.collection('videos');
+router.delete('/videos/delete', protect, deleteVideo);
 
-	const gridFsBucket = new mongoose.mongo.GridFSBucket(connection.db, {
-		bucketName: 'videos',
-	});
-
-	gfs.files.findOne({ filename: req.params.filename }, async (err, file) => {
-		if (err) return res.status(404).send(err);
-		if (!file || file.length === 0) return;
-
-		const influencer = await Influencer.findById(req.influencer.id);
-		influencer.videos.pull(file._id);
-		influencer.save();
-
-		gridFsBucket.delete(file._id);
-	});
-
-	res.status(201).json({
-		success: true,
-		message: 'Video deleted successfully',
-	});
-});
+router.post('/reset-password', resetPassword)
 
 module.exports = router;

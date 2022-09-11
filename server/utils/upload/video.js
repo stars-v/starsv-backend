@@ -31,7 +31,9 @@ const storage = new GridFsStorage({
 	},
 });
 
-const uploadVideo = multer({ storage });
+// const store = multer.st
+
+const uploadVideo = multer({ storage: multer.memoryStorage() });
 
 module.exports = {
 	uploadVideo,

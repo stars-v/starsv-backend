@@ -2,13 +2,13 @@ const mongoose = require('mongoose');
 
 const influencerSchema = mongoose.Schema(
 	{
-		fullName: {
+		name: {
 			type: String,
 			required: [true, 'Please add a full name'],
 		},
-		email: {
+		phone: {
 			type: String,
-			required: [true, 'Please add an email'],
+			required: [true, 'Please add a phone'],
 			unique: true,
 		},
 		password: {
@@ -19,7 +19,16 @@ const influencerSchema = mongoose.Schema(
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'Image',
 		},
-		videos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Video' }],
+		// videos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Video' }],
+		category: {
+			type: String,
+			enum: ["Footballer", "Singer", "Influencer", "Dancer"],
+			default: "Influencer"
+		},
+		available: {
+			type: Boolean,
+			default: false
+		}
 	},
 	{
 		timestamps: true,

@@ -1,18 +1,26 @@
 const mongoose = require('mongoose')
 
 const userSchema = mongoose.Schema({
-    fullName: {
+    name: {
         type: String,
         required: [true, 'Please add a full name']
     },
-    email: {
+    phone: {
         type: String,
-        required: [true, 'Please add an email'],
+        required: [true, 'Please add a phone number'],
         unique: true
     },
     password: {
         type: String,
         required: [true, 'Please add a password']
+    },
+    profilePhoto: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Image',
+    },
+    confirmed: {
+        type: Boolean,
+        default: false
     }
 },
     {
