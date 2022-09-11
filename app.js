@@ -21,7 +21,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.get('/', (req, res) => {
-	res.send("Server running...")
+	res.json({ message: "Server running..." })
 });
 
 app.use('/api/users', require('./server/routes/userRoutes'));

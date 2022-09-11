@@ -5,8 +5,8 @@ const fs = require('fs');
 const path = require('path');
 const asyncHandler = require('express-async-handler');
 const User = require('../models/user.model');
-const Image = require('../models/image.model');
 const { validatePhone } = require('../lib/functions/validation');
+const firebaseAdmin = require('../config/firebase/admin');
 
 
 
@@ -34,20 +34,7 @@ const registerUser = asyncHandler(async (req, res) => {
 		res.json({ success: false, message: 'User already exist' });
 	}
 
-	// Store profile image to 'images' collection
-	const obj = {
-		name: req.file.originalname,
-		desc: '',
-		img: {
-			data: fs.readFileSync(
-				path.join(
-					`${__dirname}/../../uploads/images/${req.file.filename}`
-				)
-			),
-			contentType: req.file.mimetype,
-		},
-	};
-	const image = await Image.create(obj);
+
 
 	// Hash password
 	const salt = await bcrypt.genSalt(10);
@@ -57,20 +44,21 @@ const registerUser = asyncHandler(async (req, res) => {
 		name,
 		phone,
 		password: hashedPassword,
-		profilePhoto: image.id,
+		profilePhoto: fileName,
 	});
 
-	// Remove the image from the uploads/images folder
-	fs.unlink(
-		path.join(`${__dirname}/../../uploads/images/${req.file.filename}`),
-		(err) => {
-			if (err) {
-				console.error(err);
-				return;
-			}
-			// image removed
-		}
-	);
+
+	const bucket = firebaseAdmin.storage().bucket()
+	const imageName = user._id
+	const fileName = imageName + path.extname(req.file.originalname)
+
+	bucket.file(`images/profile/${fileName}`).createWriteStream().end(req.file.buffer)
+
+
+	await User.findByIdAndUpdate(user._id, {
+		profilePhoto: fileName
+	})
+
 
 	if (user) {
 		res.status(201).json({
@@ -81,7 +69,7 @@ const registerUser = asyncHandler(async (req, res) => {
 				token: generateToken(user._id),
 			},
 			success: true,
-			message: 'User was registred successfully',
+			message: 'User was registered successfully',
 		});
 	} else {
 		res.status(400);
@@ -125,22 +113,23 @@ const getMe = asyncHandler(async (req, res) => {
 		_id,
 		name,
 		phone,
-		profilePhoto: imageId,
+		profilePhoto,
 	} = await User.findById(req.user.id);
-
-	const image = await Image.findById(imageId);
-	const final_image = {
-		data: image.img.data.toString('base64'),
-		contentType: image.img.contentType,
-	};
 
 	res.status(200).json({
 		id: _id,
 		name,
 		phone,
-		profilePhoto: final_image,
+		profilePhoto
 	});
 });
+
+const getProfilePhoto = asyncHandler(async (req, res) => {
+	const { profilePhoto } = await User.findById(req.user.id)
+
+	const bucket = firebaseAdmin.storage().bucket()
+	bucket.file(`images/profile/${profilePhoto}`).createReadStream().pipe(res)
+})
 
 
 const sendVerification = asyncHandler(async (req, res) => {
@@ -232,6 +221,7 @@ module.exports = {
 	registerUser,
 	loginUser,
 	getMe,
+	getProfilePhoto,
 	sendVerification,
 	verifyOTP,
 	confirmAccount,

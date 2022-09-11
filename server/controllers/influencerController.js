@@ -6,10 +6,10 @@ const bcrypt = require('bcryptjs');
 const asyncHandler = require('express-async-handler');
 const saltedMd5 = require('salted-md5')
 const Influencer = require('../models/influencer.model');
-const Image = require('../models/image.model');
 const client = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 const { validatePhone } = require('../lib/functions/validation')
 const firebaseAdmin = require('../config/firebase/admin')
+const { ref, getDownloadURL } = require('@firebase/storage')
 
 
 
@@ -17,7 +17,7 @@ const firebaseAdmin = require('../config/firebase/admin')
 // @route POST /api/influencers
 // @access Public
 const registerInfluencer = asyncHandler(async (req, res) => {
-	const { name, phone, password } = req.body;
+	const { name, phone, password, category } = req.body;
 	if (!name || !phone || !password) {
 		res.status(400);
 		throw new Error('Please add all fields');
@@ -37,26 +37,6 @@ const registerInfluencer = asyncHandler(async (req, res) => {
 	}
 
 
-	// Create images folder if it does not exist
-	if (!fs.existsSync(`${__dirname}/../../uploads/images/`)) {
-		fs.mkdirSync(`${__dirname}/../../uploads/images/`)
-	}
-
-	// Store profile image to 'images' collection
-	const obj = {
-		name: req.file.originalname,
-		desc: '',
-		img: {
-			data: fs.readFileSync(
-				path.join(
-					`${__dirname}/../../uploads/images/${req.file.filename}`
-				)
-			),
-			contentType: req.file.mimetype,
-		},
-	};
-	const image = await Image.create(obj);
-
 	// Hash password
 	const salt = await bcrypt.genSalt(10);
 	const hashedPassword = await bcrypt.hash(password, salt);
@@ -65,20 +45,22 @@ const registerInfluencer = asyncHandler(async (req, res) => {
 		name,
 		phone,
 		password: hashedPassword,
-		profilePhoto: image.id,
+		profilePhoto: null,
+		category
 	});
 
-	// Remove the image from the uploads/images folder
-	fs.unlink(
-		path.join(`${__dirname}/../../uploads/images/${req.file.filename}`),
-		(err) => {
-			if (err) {
-				console.error(err);
-				return;
-			}
-			// image removed
-		}
-	);
+
+	const bucket = firebaseAdmin.storage().bucket()
+	const imageName = influencer._id
+	const fileName = imageName + path.extname(req.file.originalname)
+
+	bucket.file(`images/profile/${fileName}`).createWriteStream().end(req.file.buffer)
+
+
+	await Influencer.findByIdAndUpdate(influencer._id, {
+		profilePhoto: fileName
+	})
+
 
 	if (influencer) {
 		res.status(201).json({
@@ -115,13 +97,13 @@ const loginInfluencer = asyncHandler(async (req, res) => {
 				phone: influencer.phone,
 				token: generateToken(influencer._id),
 			},
-			success: false,
+			success: true,
 			message: 'Login successful',
 		});
 	} else {
 		res.status(400);
 		res.json({
-			success: true,
+			success: false,
 			message: 'Invalid credentials',
 		});
 	}
@@ -135,22 +117,26 @@ const getMe = asyncHandler(async (req, res) => {
 		_id,
 		name,
 		phone,
-		profilePhoto: imageId,
+		profilePhoto,
 	} = await Influencer.findById(req.influencer.id);
 
-	const image = await Image.findById(imageId);
-	const final_image = {
-		data: image.img.data.toString('base64'),
-		contentType: image.img.contentType,
-	};
 
 	res.status(200).json({
 		id: _id,
 		name,
 		phone,
-		profilePhoto: final_image,
+		profilePhoto
 	});
 });
+
+
+const getProfilePhoto = asyncHandler(async (req, res) => {
+	const { profilePhoto } = await Influencer.findById(req.influencer.id)
+
+	const bucket = firebaseAdmin.storage().bucket()
+	bucket.file(`images/profile/${profilePhoto}`).createReadStream().pipe(res)
+})
+
 
 const saveVideo = asyncHandler(async (req, res) => {
 	const bucket = firebaseAdmin.storage().bucket()
@@ -178,7 +164,7 @@ const getVideos = asyncHandler(async (req, res) => {
 			}).filter(v => v.contentType.startsWith('video'))
 
 			res.status(200).json({
-				response
+				videos
 			})
 		})
 		.catch(err => {
@@ -193,12 +179,16 @@ const streamVideo = asyncHandler(async (req, res) => {
 })
 
 const downloadVideo = asyncHandler(async (req, res) => {
+	const storage = firebaseAdmin.storage()
 	const bucket = firebaseAdmin.storage().bucket()
 
-	bucket.file(req.params.filename).download().then((response) => {
-		res.status(201).json({
-			success: true,
-			message: "Video has been downloaded successfully"
+	const storageRef = ref(
+		storage,
+		req.params.filename
+	)
+	getDownloadURL(storageRef).then((downloadUrl) => {
+		res.status(200).json({
+			downloadUrl
 		})
 	})
 })
@@ -219,8 +209,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
 			error: process.env.NODE_ENV === 'production' ? null : err
 		})
 	})
-})
-
+})  
 
 const resetPassword = asyncHandler(async (req, res) => {
 	const { newPassword } = req.body
@@ -254,6 +243,7 @@ module.exports = {
 	registerInfluencer,
 	loginInfluencer,
 	getMe,
+	getProfilePhoto,
 	resetPassword,
 	getVideos,
 	saveVideo,

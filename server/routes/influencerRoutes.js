@@ -4,6 +4,7 @@ const {
 	registerInfluencer,
 	loginInfluencer,
 	getMe,
+	getProfilePhoto,
 	resetPassword,
 	getVideos,
 	saveVideo,
@@ -14,12 +15,12 @@ const {
 const { protect } = require('../middleware/authMiddleware');
 const { uploadImage } = require('../utils/upload/image');
 const { uploadVideo } = require('../utils/upload/video');
-const Influencer = require('../models/influencer.model');
-const Grid = require('gridfs-stream');
+
 
 router.post('/', uploadImage.single('profilePhoto'), registerInfluencer);
 router.post('/login', loginInfluencer);
 router.get('/me', protect, getMe);
+router.get('/profile', protect, getProfilePhoto);
 
 // -> upload a video
 router.post('/videos', protect, uploadVideo.single('video'), saveVideo);

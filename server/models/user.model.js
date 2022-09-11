@@ -15,8 +15,7 @@ const userSchema = mongoose.Schema({
         required: [true, 'Please add a password']
     },
     profilePhoto: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Image',
+        type: String
     },
     confirmed: {
         type: Boolean,
