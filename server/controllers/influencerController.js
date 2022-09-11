@@ -36,6 +36,12 @@ const registerInfluencer = asyncHandler(async (req, res) => {
 		res.json({ success: false, message: 'Influencer already exist' });
 	}
 
+
+	// Create images folder if it does not exist
+	if (!fs.existsSync(`${__dirname}/../../uploads/images/`)) {
+		fs.mkdirSync(`${__dirname}/../../uploads/images/`)
+	}
+
 	// Store profile image to 'images' collection
 	const obj = {
 		name: req.file.originalname,
@@ -85,7 +91,7 @@ const registerInfluencer = asyncHandler(async (req, res) => {
 				token: generateToken(influencer._id),
 			},
 			success: true,
-			message: 'influencer registred successfully',
+			message: 'Influencer registered successfully',
 		});
 	} else {
 		res.status(400);
