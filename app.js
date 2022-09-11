@@ -20,15 +20,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// app.use(express.static(path.join(__dirname, 'server/views')));
-app.set('view engine', 'ejs');
-
 app.get('/', (req, res) => {
-	res.render('newInfluencer');
-});
-
-app.get('/videos/read', (req, res) => {
-	res.render('video')
+	res.send("Server running...")
 });
 
 app.use('/api/users', require('./server/routes/userRoutes'));
