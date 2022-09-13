@@ -44,21 +44,8 @@ const registerUser = asyncHandler(async (req, res) => {
 		name,
 		phone,
 		password: hashedPassword,
-		profilePhoto: fileName,
+		profilePhoto: null,
 	});
-
-
-	const bucket = firebaseAdmin.storage().bucket()
-	const imageName = user._id
-	const fileName = imageName + path.extname(req.file.originalname)
-
-	bucket.file(`images/profile/${fileName}`).createWriteStream().end(req.file.buffer)
-
-
-	await User.findByIdAndUpdate(user._id, {
-		profilePhoto: fileName
-	})
-
 
 	if (user) {
 		res.status(201).json({
@@ -124,13 +111,30 @@ const getMe = asyncHandler(async (req, res) => {
 	});
 });
 
+const uploadProfilePhoto = asyncHandler(async (req, res) => {
+	const bucket = firebaseAdmin.storage().bucket()
+	const imageName = user._id
+	const fileName = imageName + path.extname(req.file.originalname)
+
+	bucket.file(`images/profile/${fileName}`).createWriteStream().end(req.file.buffer)
+
+
+	await User.findByIdAndUpdate(user._id, {
+		profilePhoto: fileName
+	})
+
+	res.status(201).json({
+		success: true,
+		message: 'Profile photo was uploaded successfully'
+	})
+})
+
 const getProfilePhoto = asyncHandler(async (req, res) => {
 	const { profilePhoto } = await User.findById(req.user.id)
 
 	const bucket = firebaseAdmin.storage().bucket()
 	bucket.file(`images/profile/${profilePhoto}`).createReadStream().pipe(res)
 })
-
 
 const sendVerification = asyncHandler(async (req, res) => {
 	const user = await User.findById(req.user.id)

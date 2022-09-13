@@ -13,10 +13,10 @@ const {
 const { protect } = require('../middleware/authMiddleware');
 const { uploadImage } = require('../utils/upload/image');
 
-router.post('/', uploadImage.single('profileImage'), registerUser);
+router.post('/', uploadImage.single('profilePhoto'), registerUser);
 router.post('/login', loginUser);
 router.get('/me', protect, getMe);
-router.get('/profile/:profilePhoto', protect, getProfilePhoto);
+router.get('/profile', protect, getProfilePhoto);
 router.post('/send-verification', protect, sendVerification);
 router.post('/verify-otp', protect, verifyOTP, confirmAccount)
 router.post('/reset-password', resetPassword)
