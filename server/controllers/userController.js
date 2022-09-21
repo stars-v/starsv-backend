@@ -80,7 +80,7 @@ const loginUser = asyncHandler(async (req, res) => {
 			message: 'Login successful',
 		});
 	} else {
-		res.status(400).json({
+		res.json({
 			success: false,
 			message: 'Invalid credentials',
 		});
