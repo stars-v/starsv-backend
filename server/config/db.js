@@ -3,10 +3,7 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
 	try {
-		const DB = process.env.NODE_ENV === 'production' ? process.env.MONGO_URI : 'mongodb://localhost:27017/StarsV'
-		const conn = await mongoose.connect(
-			DB
-		);
+		const conn = await mongoose.connect(process.env.MONGO_URI);
 		console.log(
 			`Mongodb connected: ${conn.connection.host}`.cyan.underline
 		);
@@ -16,9 +13,9 @@ const connectDB = async () => {
 	}
 };
 
-const connection = mongoose.connection
+const connection = mongoose.connection;
 
 module.exports = {
 	connectDB,
-	connection
+	connection,
 };
