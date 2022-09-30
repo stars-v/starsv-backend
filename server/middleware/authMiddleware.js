@@ -17,6 +17,7 @@ const protect = asyncHandler(async (req, res, next) => {
 
             // Get user from the token
             req.user = await User.findById(decoded.id).select('-password')
+            // Get influencer from the token
             req.influencer = await Influencer.findById(decoded.id).select('-password')
 
             next()

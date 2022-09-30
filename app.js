@@ -5,12 +5,12 @@ const colors = require('colors');
 const { errorHandler } = require('./server/middleware/errorMiddleware');
 const { connectDB } = require('./server/config/db');
 
-
 const app = express();
 
+// Connect to database
 connectDB();
 
-
+// CORS configuration
 app.use((req, res, next) => {
 	res.header('Access-Control-Allow-Origin', '*');
 	next();
@@ -20,13 +20,13 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Check whether the server is running
 app.get('/health', (req, res) => {
-	res.json({ message: "Server is running..." })
+	res.json({ message: 'Server is running...' });
 });
 
 app.use('/api/users', require('./server/routes/userRoutes'));
 app.use('/api/influencers', require('./server/routes/influencerRoutes'));
-app.use('/api/app', require('./server/routes/appRoutes'))
 
 app.use(errorHandler);
 

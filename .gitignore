@@ -1,5 +1,6 @@
 .env
 node_modules/
-NOTES
-views
+views/
 docker-compose.yml
+NOTES
+TODO

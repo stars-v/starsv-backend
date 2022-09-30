@@ -21,7 +21,7 @@ const influencerSchema = mongoose.Schema(
 		// videos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Video' }],
 		category: {
 			type: String,
-			enum: ["Footballer", "Singer", "Influencer", "Dancer"],
+			enum: ["Footballer", "Singer", "Influencer", "Dancer", "ContentCreator"],
 			default: "Influencer"
 		},
 		available: {
