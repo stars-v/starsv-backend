@@ -103,7 +103,7 @@ const getMe = asyncHandler(async (req, res) => {
 
 const uploadProfilePhoto = asyncHandler(async (req, res) => {
 	const bucket = firebaseAdmin.storage().bucket();
-	const imageName = user._id;
+	const imageName = req.user.id;
 	const fileName = imageName + path.extname(req.file.originalname);
 
 	bucket
@@ -184,14 +184,34 @@ const confirmAccount = asyncHandler(async (req, res) => {
 	});
 });
 
+const getUserByPhone = asyncHandler(async (req, res) => {
+	const user = await User.findOne({
+		phone: req.body.phone,
+	});
+
+	if (user)
+		res.status(201).json({
+			success: true,
+			message: 'User exists',
+			user,
+		});
+	else
+		res.status(400).json({
+			success: false,
+			message: 'User does not exist',
+		});
+});
+
 const resetPassword = asyncHandler(async (req, res) => {
-	const { newPassword } = req.body;
+	const { phone, newPassword } = req.body;
 	// Hash password
 	const salt = await bcrypt.genSalt(10);
 	const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-	const user = await User.findByIdAndUpdate(
-		req.user.id,
+	const user = await User.findOneAndUpdate(
+		{
+			phone,
+		},
 		{
 			$set: { password: hashedPassword },
 		},
@@ -201,10 +221,16 @@ const resetPassword = asyncHandler(async (req, res) => {
 		}
 	);
 
-	res.status(201).json({
-		success: true,
-		user,
-	});
+	if (user)
+		res.status(201).json({
+			success: true,
+			user,
+		});
+	else
+		res.status(400).json({
+			success: false,
+			message: 'Invalid phone number',
+		});
 });
 
 const generateToken = (id) => {
@@ -217,6 +243,7 @@ module.exports = {
 	registerUser,
 	loginUser,
 	getMe,
+	getUserByPhone,
 	getProfilePhoto,
 	sendVerification,
 	verifyOTP,
