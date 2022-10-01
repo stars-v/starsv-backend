@@ -17,7 +17,7 @@ const { uploadImage } = require('../utils/upload/image');
 router.post('/', uploadImage.single('profilePhoto'), registerUser);
 router.post('/login', loginUser);
 router.get('/me', protect, getMe);
-router.get('/user-exist', getUserByPhone);
+router.post('/user-exist', getUserByPhone);
 router.get('/profile', protect, getProfilePhoto);
 router.post('/send-verification', protect, sendVerification);
 router.post('/verify-otp', protect, verifyOTP, confirmAccount);
