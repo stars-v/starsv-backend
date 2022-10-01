@@ -193,7 +193,6 @@ const getUserByPhone = asyncHandler(async (req, res) => {
 		res.status(201).json({
 			success: true,
 			message: 'User exists',
-			user,
 		});
 	else
 		res.status(400).json({
@@ -208,23 +207,19 @@ const resetPassword = asyncHandler(async (req, res) => {
 	const salt = await bcrypt.genSalt(10);
 	const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-	const user = await User.findOneAndUpdate(
+	const user = await User.updateOne(
 		{
 			phone,
 		},
 		{
-			$set: { password: hashedPassword },
-		},
-		{ new: true },
-		(err, doc) => {
-			console.log(err);
+			password: hashedPassword,
 		}
 	);
 
 	if (user)
 		res.status(201).json({
 			success: true,
-			user,
+			message: 'Password was changed with success',
 		});
 	else
 		res.status(400).json({
