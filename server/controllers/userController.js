@@ -53,7 +53,7 @@ const registerUser = asyncHandler(async (req, res) => {
 			message: 'User was registered successfully',
 		});
 	} else {
-		res.status(400).json({
+		res.json({
 			success: false,
 			message: 'Invalid credentials',
 		});
@@ -195,7 +195,7 @@ const getUserByPhone = asyncHandler(async (req, res) => {
 			message: 'User exists',
 		});
 	else
-		res.status(400).json({
+		res.json({
 			success: false,
 			message: 'User does not exist',
 		});
