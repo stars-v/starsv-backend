@@ -16,18 +16,27 @@ const influencerSchema = mongoose.Schema(
 			required: [true, 'Please add a password'],
 		},
 		profilePhoto: {
-			type: String
+			type: String,
 		},
 		// videos: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Video' }],
 		category: {
 			type: String,
-			enum: ["Footballer", "Singer", "Influencer", "Dancer", "ContentCreator"],
-			default: "Influencer"
+			enum: {
+				values: [
+					'Footballer',
+					'Singer',
+					'Influencer',
+					'Dancer',
+					'Content creator',
+				],
+				message: '{VALUE} is not supported',
+			},
+			default: 'Influencer',
 		},
 		available: {
 			type: Boolean,
-			default: false
-		}
+			default: false,
+		},
 	},
 	{
 		timestamps: true,
