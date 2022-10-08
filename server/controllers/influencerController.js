@@ -150,7 +150,7 @@ const getMe = asyncHandler(async (req, res) => {
 });
 
 const getProfilePhoto = asyncHandler(async (req, res) => {
-	const { profilePhoto } = await Influencer.findById(req.influencer.id);
+	const { profilePhoto } = await Influencer.findById(req.query.id);
 
 	const bucket = firebaseAdmin.storage().bucket();
 	bucket.file(`images/profile/${profilePhoto}`).createReadStream().pipe(res);
