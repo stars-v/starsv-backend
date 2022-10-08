@@ -29,7 +29,7 @@ router.post('/login', loginInfluencer);
 router.get('/me', protect, getMe);
 
 // -> Get profile image as a stream
-router.get('/profile', protect, getProfilePhoto);
+router.get('/profile', getProfilePhoto);
 
 // -> upload a video
 router.post('/videos', protect, uploadVideo.single('video'), saveVideo);
