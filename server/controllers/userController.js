@@ -7,6 +7,11 @@ const asyncHandler = require('express-async-handler');
 const User = require('../models/user.model');
 const { validatePhone } = require('../lib/functions/validation');
 const firebaseAdmin = require('../config/firebase/admin');
+const { ref, getDownloadURL } = require('firebase/storage');
+const client = require('twilio')(
+	process.env.TWILIO_ACCOUNT_SID,
+	process.env.TWILIO_AUTH_TOKEN
+);
 
 // @desc Register new user
 // @route POST /api/users
@@ -41,12 +46,27 @@ const registerUser = asyncHandler(async (req, res) => {
 		profilePhoto: null,
 	});
 
+	/* const bucket = firebaseAdmin.storage().bucket();
+	const imageName = user._id;
+	const fileName = imageName + path.extname(req.file.originalname);
+
+	bucket
+		.file(`images/profile/${fileName}`)
+		.createWriteStream()
+		.end(req.file.buffer);
+
+	await User.findByIdAndUpdate(user._id, {
+		profilePhoto: fileName,
+	}); */
+
 	if (user) {
-		res.status(201).json({
+		// res.send('ok');
+		res.json({
 			user: {
 				_id: user.id,
 				name: user.name,
 				phone: user.phone,
+				profilePhoto: user.profilePhoto,
 				token: generateToken(user._id),
 			},
 			success: true,
@@ -122,7 +142,7 @@ const uploadProfilePhoto = asyncHandler(async (req, res) => {
 });
 
 const getProfilePhoto = asyncHandler(async (req, res) => {
-	const { profilePhoto } = await User.findById(req.user.id);
+	const { profilePhoto } = await User.findById(req.query.id);
 
 	const bucket = firebaseAdmin.storage().bucket();
 	bucket.file(`images/profile/${profilePhoto}`).createReadStream().pipe(res);
@@ -178,10 +198,7 @@ const confirmAccount = asyncHandler(async (req, res) => {
 	await User.findByIdAndUpdate(req.user.id, {
 		$set: { confirmed: true },
 	});
-	res.status(201).json({
-		success: true,
-		message: 'Account is confirmed',
-	});
+	res.end();
 });
 
 const getUserByPhone = asyncHandler(async (req, res) => {
