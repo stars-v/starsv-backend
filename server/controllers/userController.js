@@ -178,11 +178,13 @@ const verifyOTP = asyncHandler(async (req, res) => {
 		.then((data) => {
 			if (data.status === 'approved') {
 				res.status(200).json({
+					success: true,
 					message: 'Account is verified',
 					data,
 				});
 			} else {
 				res.status(400).json({
+					success: false,
 					message: 'Account is not verified',
 					data,
 				});
