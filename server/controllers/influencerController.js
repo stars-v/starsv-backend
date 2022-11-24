@@ -115,9 +115,7 @@ const loginInfluencer = asyncHandler(async (req, res) => {
 	if (influencer && (await bcrypt.compare(password, influencer.password))) {
 		res.json({
 			influencer: {
-				_id: influencer.id,
-				name: influencer.name,
-				phone: influencer.phone,
+				...user,
 				token: generateToken(influencer._id),
 			},
 			success: true,
