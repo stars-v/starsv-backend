@@ -210,6 +210,7 @@ const getUserByPhone = asyncHandler(async (req, res) => {
 		res.status(201).json({
 			success: true,
 			message: 'User exists',
+			token: generateToken(user._id),
 		});
 	else
 		res.json({
