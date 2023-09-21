@@ -3,10 +3,11 @@ const mongoose = require('mongoose');
 
 function connectToDatabase() {
 	// Replace 'your-database-connection-string' with your actual MongoDB connection string.
-	// const connectionString = 'mongodb://localhost:27017/starsv';
+	const connectionString =
+		'mongodb+srv://mdhamed:GmWIDgt53cm6knv3@cluster0.aimxzsp.mongodb.net/?retryWrites=true&w=majority';
 
 	// Connect to the MongoDB database
-	mongoose.connect(process.env.MONGO_URI, {
+	mongoose.connect(connectionString, {
 		useNewUrlParser: true,
 		useUnifiedTopology: true,
 	});
