@@ -3,12 +3,12 @@ const express = require('express');
 const cors = require('cors');
 const colors = require('colors');
 const { errorHandler } = require('./server/middleware/errorMiddleware');
-const { connectDB } = require('./server/config/db');
+const connectToDatabase = require('./server/config/db');
 
 const app = express();
 
 // Connect to database
-connectDB();
+connectToDatabase();
 
 // CORS configuration
 app.use((req, res, next) => {

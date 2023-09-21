@@ -1,17 +1,11 @@
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const fs = require('fs');
 const path = require('path');
 const asyncHandler = require('express-async-handler');
 const User = require('../models/user.model');
 const { validatePhone } = require('../lib/functions/validation');
 const firebaseAdmin = require('../config/firebase/admin');
-const { ref, getDownloadURL } = require('firebase/storage');
-const client = require('twilio')(
-	process.env.TWILIO_ACCOUNT_SID,
-	process.env.TWILIO_AUTH_TOKEN
-);
 
 // @desc Register new user
 // @route POST /api/users
@@ -146,53 +140,53 @@ const getProfilePhoto = asyncHandler(async (req, res) => {
 	bucket.file(`images/profile/${profilePhoto}`).createReadStream().pipe(res);
 });
 
-const sendVerification = asyncHandler(async (req, res) => {
-	const user = await User.findById(req.user.id);
-	const { phone } = user;
+// const sendVerification = asyncHandler(async (req, res) => {
+// 	const user = await User.findById(req.user.id);
+// 	const { phone } = user;
 
-	client.verify
-		.services(process.env.VERIFY_SERVICE_SID)
-		.verifications.create({ to: `+${phone}`, channel: 'sms' })
-		.then((data) => {
-			res.status(200).json({
-				message: 'Verification is sent!!',
-				phone: req.query.phone,
-				data,
-			});
-		})
-		.catch((e) => {
-			console.log(e);
-			res.status(500).send(e);
-		});
-});
+// 	client.verify
+// 		.services(process.env.VERIFY_SERVICE_SID)
+// 		.verifications.create({ to: `+${phone}`, channel: 'sms' })
+// 		.then((data) => {
+// 			res.status(200).json({
+// 				message: 'Verification is sent!!',
+// 				phone: req.query.phone,
+// 				data,
+// 			});
+// 		})
+// 		.catch((e) => {
+// 			console.log(e);
+// 			res.status(500).send(e);
+// 		});
+// });
 
-const verifyOTP = asyncHandler(async (req, res) => {
-	const user = await User.findById(req.user.id);
-	const { phone } = user;
+// const verifyOTP = asyncHandler(async (req, res) => {
+// 	const user = await User.findById(req.user.id);
+// 	const { phone } = user;
 
-	await client.verify
-		.services(process.env.VERIFY_SERVICE_SID)
-		.verificationChecks.create({ to: `+${phone}`, code: req.body.otp })
-		.then((data) => {
-			if (data.status === 'approved') {
-				res.status(200).json({
-					success: true,
-					message: 'Account is verified',
-					data,
-				});
-			} else {
-				res.status(400).json({
-					success: false,
-					message: 'Account is not verified',
-					data,
-				});
-			}
-		})
-		.catch((e) => {
-			console.log(e);
-			res.status(500).send(e);
-		});
-});
+// 	await client.verify
+// 		.services(process.env.VERIFY_SERVICE_SID)
+// 		.verificationChecks.create({ to: `+${phone}`, code: req.body.otp })
+// 		.then((data) => {
+// 			if (data.status === 'approved') {
+// 				res.status(200).json({
+// 					success: true,
+// 					message: 'Account is verified',
+// 					data,
+// 				});
+// 			} else {
+// 				res.status(400).json({
+// 					success: false,
+// 					message: 'Account is not verified',
+// 					data,
+// 				});
+// 			}
+// 		})
+// 		.catch((e) => {
+// 			console.log(e);
+// 			res.status(500).send(e);
+// 		});
+// });
 
 const confirmAccount = asyncHandler(async (req, res) => {
 	await User.findByIdAndUpdate(req.user.id, {
@@ -258,8 +252,6 @@ module.exports = {
 	getMe,
 	getUserByPhone,
 	getProfilePhoto,
-	sendVerification,
-	verifyOTP,
 	confirmAccount,
 	resetPassword,
 };

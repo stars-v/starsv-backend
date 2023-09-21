@@ -6,10 +6,6 @@ const bcrypt = require('bcryptjs');
 const asyncHandler = require('express-async-handler');
 const saltedMd5 = require('salted-md5');
 const Influencer = require('../models/influencer.model');
-const client = require('twilio')(
-	process.env.TWILIO_ACCOUNT_SID,
-	process.env.TWILIO_AUTH_TOKEN
-);
 const { validatePhone } = require('../lib/functions/validation');
 const firebaseAdmin = require('../config/firebase/admin');
 const { ref, getDownloadURL } = require('firebase/storage');
